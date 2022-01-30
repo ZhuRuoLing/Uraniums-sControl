@@ -35,9 +35,8 @@ def on_player_joined(server: PluginServerInterface, player: str, info: Info):
             config.get("qlink_key")
         ]
     }
-    sock.sendall(crypter.encrypt(json.dumps(data) + '\n').encode('utf-8'))
+    sock.sendall((crypter.encrypt(json.dumps(data)) + '\n').encode('utf-8'))
     data = sock.recv(BUF_SIZE)
-    print(data)
     sock.close()
     if data is not None:
         decrypted_data = crypter.decrypt(data.decode("utf-8"))
@@ -46,6 +45,7 @@ def on_player_joined(server: PluginServerInterface, player: str, info: Info):
         msg: str
         msg = ddict.get("msg")
         if msg == "OK":
+            server.logger.info("Auth complete:" + player)
             return
         else:
             server.execute("kick {} 恁不在白名单中".format(player))
