@@ -19,22 +19,25 @@ def on_load(server: PluginServerInterface, prev):
     pass
 
 
+@new_thread("PlayerJoinEvent")
 def on_player_joined(server: PluginServerInterface, player: str, info: Info):
-    # query
     global config
     sock = socket()
     endpoint = (config.get("qlink_ip"), config.get("qlink_port"))
+    sock.settimeout(5.0)
     sock.connect(endpoint)
     crypter = Crypto(config.get("qlink_crypto_key"))
     data = {
         "cmd": "WHITELIST_QUERY",
         "load": [
+            config.get("uses_whitelist"),
             player,
             config.get("qlink_key")
         ]
     }
-    sock.send(crypter.encrypt(json.dumps(data)))
+    sock.sendall(crypter.encrypt(json.dumps(data) + '\n').encode('utf-8'))
     data = sock.recv(BUF_SIZE)
+    print(data)
     sock.close()
     if data is not None:
         decrypted_data = crypter.decrypt(data.decode("utf-8"))
