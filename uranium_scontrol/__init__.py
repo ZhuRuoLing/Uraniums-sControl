@@ -23,6 +23,9 @@ def on_load(server: PluginServerInterface, prev):
 def on_player_joined(server: PluginServerInterface, player: str, info: Info):
     global config
     sock = socket()
+    if '[local]' in player:
+        server.logger.info("Auth complete[local]:" + player)
+        return
     endpoint = (config.get("qlink_ip"), config.get("qlink_port"))
     sock.settimeout(5.0)
     sock.connect(endpoint)
