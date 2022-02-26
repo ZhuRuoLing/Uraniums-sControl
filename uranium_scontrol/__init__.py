@@ -9,8 +9,8 @@ from .socket_server import cfg, service
 
 config = DEFAULT_CONFIG.copy()
 default_cfg = cfg.copy()
-passed_server = None
 text_3: list
+
 
 def on_load(server: PluginServerInterface, prev):
     service(server)
@@ -22,7 +22,7 @@ def on_load(server: PluginServerInterface, prev):
 
 @new_thread("PlayerJoinEvent")
 def on_player_joined(server: PluginServerInterface, player: str, info: Info):
-    global config, passed_server, text_3
+    global config, text_3
     sock = socket()
     if '[local]' in player:
         server.logger.info("Auth complete[local]:" + player)
