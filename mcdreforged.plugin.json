@@ -1,10 +1,10 @@
 {
     "id": "uranium_scontrol",
-    "version": "0.0.5-pre1",
+    "version": "0.1.0-pre2",
     "name": "Uranium sControl Client",
     "description": "A remote control plugin for MCDReforged",
     "author": "ZhuRuoLing",
     "dependencies": {
-       "mcdreforged": ">=2.0.0-alpha.1"
+       "mcdreforged": ">=2.2.0-alpha.1"
     }
 }
