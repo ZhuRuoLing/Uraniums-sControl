@@ -39,7 +39,6 @@ def on_player_joined(server: PluginServerInterface, player: str, info: Info):
     }
     sock.sendall((_crypto.encrypt(json.dumps(data)) + '\n').encode('utf-8'))
     data = sock.recv(BUF_SIZE)
-    sock.close()
     servers: list
     if data is not None:
         decrypted_data = _crypto.decrypt(data.decode("utf-8"))
@@ -73,7 +72,7 @@ def on_player_joined(server: PluginServerInterface, player: str, info: Info):
         }
         sock.sendall((_crypto.encrypt(json.dumps(_data)) + '\n').encode('utf-8'))
         _data = sock.recv(BUF_SIZE)
-        sock.close()
+
         if _data is not None:
             _decrypted_data = _crypto.decrypt(_data.decode("utf-8"))
             _dictionary: dict
@@ -85,7 +84,7 @@ def on_player_joined(server: PluginServerInterface, player: str, info: Info):
             else:
                 return False
 
-    passed_server: list
+    passed_server = []
     for name in servers:
         if check_server(sock, name, player_name=player):
             passed_server.append(name)
@@ -103,6 +102,7 @@ def on_player_joined(server: PluginServerInterface, player: str, info: Info):
                                                                                             f"/server {i}")
             rtext_list = RTextList("[", rtext, "]")
             text_3.append(rtext_list)
+        sock.close()
         server_list = RTextList(*text_3)
         server.tell(player, text_1)
         server.tell(player, text_2)
