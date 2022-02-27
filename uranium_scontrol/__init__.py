@@ -93,10 +93,10 @@ def on_player_joined(server: PluginServerInterface, player: str, info: Info):
         name = config.get("name")
         text_1 = f"--------------- {name} ----------------"
         text_2 = "欢迎！点击下面的名字以进入对应服务器。"
-
+        text_3 = []
         for i in passed_server:
             if i == config.get("uses_whitelist"):
-                rtext = RText(i).set_color(RColor.reset).set_hover_text("i")
+                rtext = RText(i).set_color(RColor.yellow).set_hover_text("i")
             else:
                 rtext = RText(i).set_color(RColor.aqua).set_hover_text("i").set_click_event(RAction.suggest_command,
                                                                                             f"/server {i}")
