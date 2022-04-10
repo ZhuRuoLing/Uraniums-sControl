@@ -19,14 +19,14 @@ def on_load(server: PluginServerInterface, prev):
     global config
     config = server.load_config_simple(default_config=default_cfg)
     server.logger.info(config)
-    udp_broadcast_receiver(server)
+    udp_broadcast_receiver(server, config)
     pass
 
 
 @new_thread("PlayerJoinEvent")
 def on_player_joined(server: PluginServerInterface, player: str, info: Info):
     global config, text_3
-    sock = socket()
+    sock = socket.socket()
     if '[local]' in player:
         server.logger.info("Auth complete[local]:" + player)
         return
@@ -124,16 +124,18 @@ def on_user_info(server: PluginServerInterface, info: Info):
             from_player = json_dict.get("player")
             content = json_dict.get("content")
     """
+    if not info.is_player:
+        return
     message = {
         "time": int(time.time()),
-        "server": config.get("uses_whitelist"),
+        "server": config.get("name"),
         "player": info.player,
         "content": info.content
     }
     json_text = json.dumps(message)
     data = json_text.encode("utf-8")
     s = socket.socket(type=socket.SOCK_DGRAM)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,0)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(("0.0.0.0", 10086))
     s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 64)
     s.setsockopt(socket.IPPROTO_IP,
@@ -141,4 +143,5 @@ def on_user_info(server: PluginServerInterface, info: Info):
                  socket.inet_aton("224.114.51.4") + socket.inet_aton("0.0.0.0"))
     s.setblocking(True)
     s.sendto(data, ("224.114.51.4", 10086))
+    s.close()
 

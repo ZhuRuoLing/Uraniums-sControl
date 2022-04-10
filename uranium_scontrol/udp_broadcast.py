@@ -5,7 +5,7 @@ from mcdreforged.api.all import *
 
 
 @new_thread("UdpBroadcastReceiver")
-def udp_broadcast_receiver(server: PluginServerInterface):
+def udp_broadcast_receiver(server: PluginServerInterface, config: dict):
     server.logger.info("Started Broadcast receiver thread")
     s = socket.socket(type=socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -24,6 +24,8 @@ def udp_broadcast_receiver(server: PluginServerInterface):
             from_server = json_dict.get("server")
             from_player = json_dict.get("player")
             content = json_dict.get("content")
+            if config.get("name") == from_server:
+                continue
             server_ = RText(from_server).set_color(RColor.yellow).set_styles(RStyle.bold)
             player = RText(from_player).set_color(RColor.green)
 
