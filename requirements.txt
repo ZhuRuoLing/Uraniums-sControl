@@ -1,1 +1,3 @@
 pycryptodome > 3.0.0
+mcdreforged >= 2.2.0
+

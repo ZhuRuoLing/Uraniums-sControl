@@ -1,11 +1,13 @@
 import json
-from socket import socket
+import time
+import socket
 
 from mcdreforged.api.all import *
 
 from .constant import *
 from .crypto import Crypto
 from .socket_server import cfg, service
+from .udp_broadcast import udp_broadcast_receiver
 
 config = DEFAULT_CONFIG.copy()
 default_cfg = cfg.copy()
@@ -17,6 +19,7 @@ def on_load(server: PluginServerInterface, prev):
     global config
     config = server.load_config_simple(default_config=default_cfg)
     server.logger.info(config)
+    udp_broadcast_receiver(server)
     pass
 
 
@@ -96,10 +99,10 @@ def on_player_joined(server: PluginServerInterface, player: str, info: Info):
         text_3 = []
         for i in passed_server:
             if i == config.get("uses_whitelist"):
-                rtext = RText(i).set_color(RColor.yellow).set_hover_text("i")
+                rtext = RText(i).set_color(RColor.yellow).set_hover_text(i)
             else:
-                rtext = RText(i).set_color(RColor.aqua).set_hover_text("i").set_click_event(RAction.suggest_command,
-                                                                                            f"/server {i}")
+                rtext = RText(i).set_color(RColor.aqua).set_hover_text(i).set_click_event(RAction.suggest_command,
+                                                                                          f"/server {i}")
             rtext_list = RTextList("[", rtext, "]")
             text_3.append(rtext_list)
         sock.close()
@@ -112,3 +115,30 @@ def on_player_joined(server: PluginServerInterface, player: str, info: Info):
         return
     else:
         server.execute("kick {} 你不在白名单中".format(player))
+
+
+def on_user_info(server: PluginServerInterface, info: Info):
+    """
+    send_time = json_dict.get("time")
+            from_server = json_dict.get("server")
+            from_player = json_dict.get("player")
+            content = json_dict.get("content")
+    """
+    message = {
+        "time": int(time.time()),
+        "server": config.get("uses_whitelist"),
+        "player": info.player,
+        "content": info.content
+    }
+    json_text = json.dumps(message)
+    data = json_text.encode("utf-8")
+    s = socket.socket(type=socket.SOCK_DGRAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,0)
+    s.bind(("0.0.0.0", 10086))
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 64)
+    s.setsockopt(socket.IPPROTO_IP,
+                 socket.IP_ADD_MEMBERSHIP,
+                 socket.inet_aton("224.114.51.4") + socket.inet_aton("0.0.0.0"))
+    s.setblocking(True)
+    s.sendto(data, ("224.114.51.4", 10086))
+
